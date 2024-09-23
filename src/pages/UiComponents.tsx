@@ -30,7 +30,7 @@ const UiComponents = () => {
         <MultiSelect
           options={frameworksList}
           onValueChange={(e) => console.log(e)}
-          defaultValue={["value"]}
+          
           placeholder="Select options"
           variant="inverted"
           animation={2}
