@@ -1,5 +1,6 @@
 import UiComponents from "@/pages/UiComponents";
 import SeatArrangements from "@/pages/SeatArrangements";
+import GroupedTable from "@/pages/RowGrouping";
 
 export const routes = [
   {
@@ -11,5 +12,10 @@ export const routes = [
     name: "Seat Arrangement",
     path: "/seat",
     Component: SeatArrangements,
+  },
+  {
+    name: "Grouped Table",
+    path: "/table",
+    Component: GroupedTable,
   },
 ];
