@@ -1,4 +1,4 @@
-import React from "react";
+
 import {
   useReactTable,
   getCoreRowModel,
@@ -42,8 +42,7 @@ const columns = [
       }),
     ],
   }),
-];
-
+];  
 
 export default function GroupedTable  () {
   const table = useReactTable({

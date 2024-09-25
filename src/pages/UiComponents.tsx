@@ -1,4 +1,5 @@
 import { MultiSelect } from "@/components/ui/MultiSelect";
+import Datatables from "./Datatable";
 
 const UiComponents = () => {
   const frameworksList = [
@@ -37,6 +38,7 @@ const UiComponents = () => {
           maxCount={3}
         />
       </div>
+      <Datatables/>
     </div>
   );
 };
