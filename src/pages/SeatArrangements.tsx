@@ -1,69 +1,32 @@
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
-interface Seat {
-  id: string;
-  number: number;
-  status: "available" | "booked" | "selected";
-  /**
-   * When true the seat is hidden.
-   */
-  hidden?: boolean;
+
+
+interface SeatCreation {
+  hidden: boolean;
 }
 
-const areRowsEqual = (rows: Seat[][], seatData: Seat[][]): boolean => {
+const areRowsEqual = (rows: SeatCreation[][], seatData: SeatCreation[][]): boolean => {
   return JSON.stringify(rows) === JSON.stringify(seatData);
 };
 
 const SeatArrangements = () => {
-  const seatData: Seat[][] = [
-    [
-      { id: "1A", number: 1, status: "available" },
-      { id: "1B", number: 2, status: "available" },
-      { id: "1C", number: 3, status: "available" },
-      { id: "1D", number: 4, status: "available" },
-    ],
-    [
-      { id: "2A", number: 1, status: "available" },
-      { id: "2B", number: 2, status: "available" },
-      { id: "2C", number: 3, status: "available" },
-      { id: "2D", number: 4, status: "available" },
-    ],
-    [
-      { id: "3A", number: 1, status: "available" },
-      { id: "3B", number: 2, status: "available" },
-      { id: "3C", number: 3, status: "available" },
-      { id: "3D", number: 4, status: "available" },
-    ],
-    [
-      { id: "4A", number: 1, status: "available" },
-      { id: "4B", number: 2, status: "available" },
-      { id: "4C", number: 3, status: "available" },
-      { id: "4D", number: 4, status: "available" },
-    ],
-    [
-      { id: "5A", number: 1, status: "available" },
-      { id: "5B", number: 2, status: "available" },
-      { id: "5C", number: 3, status: "available" },
-      { id: "5D", number: 4, status: "available" },
-    ]
-  ];
+  
+  const [grid, setGrid] = useState<SeatCreation[][]>([]);
+  const [rows, setRows] = useState<SeatCreation[][]>([]);
 
-  const [rows, setRows] = useState<Seat[][]>(seatData);
+  const [columns, setColumns] = useState<number>(0);
+  const [rowNo, setRowNo] = useState<number>(0);
 
-  const handleSeatClick = (seat: Seat) => {
+  const handleSeatClick = (first: number, second: number) => {
     setRows((prevRows) =>
-      prevRows.map((row) =>
-        row.map((s) =>
-          s.id === seat.id
+      prevRows.map((row, i) =>
+        row.map((s, y) =>
+          i == first && y == second
             ? {
                 ...s,
-                status:
-                  s.status === "booked"
-                    ? "booked"
-                    : s.status === "available"
-                      ? "selected"
-                      : "available",
+                hidden: s.hidden ? false : true,
               }
             : s,
         ),
@@ -71,33 +34,55 @@ const SeatArrangements = () => {
     );
   };
 
+  const generateGrid = (rows: number, columns: number) => {
+    const newGrid = Array.from({ length: rows }, () =>
+      Array.from({ length: columns }, () => ({ hidden: false })),
+    );
+    setGrid(newGrid);
+    setRows(newGrid);
+  };
+
   return (
     <>
+      <div className="flex space-x-2 p-2">
+        <input
+          type="text"
+          value={rowNo == 0 ? "" : rowNo}
+          onChange={(e) => setRowNo(+e.target.value)}
+          placeholder="Rows"
+          className="w-24 rounded-md border border-zinc-500 bg-transparent px-4 py-2"
+        />
+        <input
+          type="text"
+          placeholder="Columns"
+          value={columns == 0 ? "" : columns}
+          onChange={(e) => setColumns(+e.target.value)}
+          className="w-24 rounded-md border border-zinc-500 bg-transparent px-4 py-2"
+        />
+        <button
+          className="rounded-md bg-blue-600 px-4 py-2 capitalize"
+          onClick={() => generateGrid(rowNo, columns)}
+        >
+          create
+        </button>
+      </div>
       <div className="flex flex-col space-y-2 p-2">
-        {rows.map((e) => (
+        {rows.map((e, i) => (
           <div className="flex space-x-2">
-            {e.map((e) => (
+            {e.map((e, y) => (
               <div
-                onClick={() => handleSeatClick(e)}
+                onClick={() => handleSeatClick(i, y)}
                 className={cn(
                   "size-8 cursor-pointer select-none",
-                  e.status == "available"
-                    ? "bg-green-500"
-                    : e.status == "selected"
-                      ? "bg-amber-500"
-                      : "bg-zinc-500",
-                  e.hidden
-                    ? "invisible"
-                    : "flex items-center justify-center rounded-md text-xs",
+                  e.hidden ? "bg-zinc-500" : "bg-green-500",
+                  "flex items-center justify-center rounded-md text-xs",
                 )}
-              >
-                  
-              </div>
+              ></div>
             ))}
           </div>
         ))}
       </div>
-      {!areRowsEqual(rows, seatData) && (
+      {!areRowsEqual(rows, grid) && (
         <button className="rounded-md bg-amber-400 px-4 py-2 text-black">
           Confirm
         </button>
