@@ -1,12 +1,10 @@
 import { useForm } from "react-hook-form";
 import { Textinputs } from "@/components/ui/Inputs";
-import { FaCheckCircle } from "react-icons/fa";
 import { useFormStore } from "@/zustand/zustandStore";
-import { ReactNode, useMemo, useState,useEffect } from "react";
+import { ReactNode, useMemo, useState } from "react";
 
 const StepperForm = () => {
   const [currentForm, setCurrentForm] = useState<number>(1);
-  const [formData, setFormData] = useState<any>();
 
   const { form1, form2, updateform2, updateform1 } = useFormStore();
 
@@ -20,13 +18,13 @@ const StepperForm = () => {
     defaultValues: form2,
   });
 
-  
-  
-  useEffect(() => {
-    if (currentForm === 3) setFormData({ ...form1, ...form2 });
-    // return { firstName: "", lastName: "" };
+  const formData = useMemo(() => {
+    if (currentForm === 3) return { ...form1, ...form2 };
+    return {
+      firstName: "",
+      lastName: "",
+    };
   }, [currentForm, form1, form2]);
-  
 
   return (
     <>
@@ -97,8 +95,7 @@ const StepperForm = () => {
         )}
         {currentForm > 2 && (
           <pre>
-            {formData?.firstName}{" "}
-            {formData?.lastName}
+            {formData?.firstName as ReactNode} {formData?.lastName as ReactNode}
           </pre>
         )}
       </div>
