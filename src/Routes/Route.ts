@@ -1,6 +1,7 @@
 import UiComponents from "@/pages/UiComponents";
 import SeatArrangements from "@/pages/SeatArrangements";
 import GroupedTable from "@/pages/RowGrouping";
+import StepperForm from "@/pages/StepperForm";
 
 export const routes = [
   {
@@ -17,5 +18,10 @@ export const routes = [
     name: "Grouped Table",
     path: "/table",
     Component: GroupedTable,
+  },
+  {
+    name: "Stepper Form",
+    path: "/stepper",
+    Component: StepperForm,
   },
 ];
