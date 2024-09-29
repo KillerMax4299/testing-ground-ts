@@ -2,6 +2,7 @@ import UiComponents from "@/pages/UiComponents";
 import SeatArrangements from "@/pages/SeatArrangements";
 import GroupedTable from "@/pages/RowGrouping";
 import StepperForm from "@/pages/StepperForm";
+import DynamicForm from "@/pages/DynamicForm";
 
 export const routes = [
   {
@@ -23,5 +24,10 @@ export const routes = [
     name: "Stepper Form",
     path: "/stepper",
     Component: StepperForm,
+  },
+  {
+    name: "Dynamic Form",
+    path: "/dynamic",
+    Component: DynamicForm,
   },
 ];
