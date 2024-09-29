@@ -3,6 +3,7 @@ import SeatArrangements from "@/pages/SeatArrangements";
 import GroupedTable from "@/pages/RowGrouping";
 import StepperForm from "@/pages/StepperForm";
 import DynamicForm from "@/pages/DynamicForm";
+import FramerMotion from "@/pages/FramerMotion";
 
 export const routes = [
   {
@@ -29,5 +30,10 @@ export const routes = [
     name: "Dynamic Form",
     path: "/dynamic",
     Component: DynamicForm,
+  },
+  {
+    name: "Framer motion",
+    path: "/motion",
+    Component: FramerMotion,
   },
 ];
