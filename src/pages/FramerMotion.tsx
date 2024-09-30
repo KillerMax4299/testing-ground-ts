@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence, cubicBezier } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const FramerMotion = () => {
   const [frame, setFrame] = useState<number>(1);
   const [direction, setDirection] = useState<number>(0);
+  const [isFlipped, setIsFlipped] = useState<boolean>(false);
 
   const nextFrame = () => {
     setDirection(1);
@@ -16,9 +17,13 @@ const FramerMotion = () => {
     setFrame((prev) => (prev > 1 ? prev - 1 : prev));
   };
 
+  useEffect(() => {
+    console.log(isFlipped);
+  }, [isFlipped]);
+
   return (
-    <div className="mx-auto mt-20 w-36">
-      <div className="relative h-36 overflow-hidden">
+    <div className="mx-auto mt-20 h-min w-40 border">
+      <div className="relative h-40 overflow-hidden">
         <AnimatePresence initial={false} custom={direction}>
           {frame === 1 && (
             <Frame
@@ -46,7 +51,7 @@ const FramerMotion = () => {
           )}
         </AnimatePresence>
       </div>
-      <div className="mt-2 flex justify-between">
+      <div className="mt-1 flex justify-between">
         <button
           className={cn(
             "rounded-md bg-blue-400 px-2 py-1 disabled:cursor-not-allowed disabled:bg-neutral-400 disabled:text-neutral-300",
@@ -74,20 +79,20 @@ const variants = {
   enter: (direction: number) => {
     return {
       x: direction > 0 ? "100%" : "-100%",
-      opacity: 0.7,
-      scale:1
+      opacity: 1,
+      scale: 1,
     };
   },
   center: {
     x: 0,
     opacity: 1,
-    scale:1
+    scale: 1,
   },
   exit: (direction: number) => {
     return {
       x: direction < 0 ? "100%" : "-100%",
-      opacity: 0.7,
-      scale:0.3
+      opacity: 1,
+      scale: 1,
     };
   },
 };
@@ -95,12 +100,17 @@ const variants = {
 const Frame = ({
   frameNum,
   className,
+  frontText,
+  backText,
   custom,
 }: {
   frameNum: number;
   className: string;
+  frontText?: string;
+  backText?: string;
   custom: number;
 }) => {
+  const [isFlipped, setIsFlipped] = useState<boolean>(false);
   return (
     <motion.div
       variants={variants}
@@ -108,6 +118,8 @@ const Frame = ({
       initial="enter"
       animate="center"
       exit="exit"
+      onMouseEnter={() => setIsFlipped(true)}
+      onMouseLeave={() => setIsFlipped(false)}
       transition={{
         // x: { type: "spring", stiffness: 300, damping: 30 },
         duration: 0.3,
@@ -115,13 +127,41 @@ const Frame = ({
         opacity: { duration: 0.2 },
       }}
       className={cn(
-        "absolute left-0 top-0 flex size-36 items-center justify-center rounded-md border bg-neutral-400 capitalize text-black",
-        className,
+        "absolute left-0 top-0 size-40 bg-transparent p-1 px-2 capitalize text-black",
       )}
     >
-      <div>
-
-      frame {frameNum}
+      <div
+        className={cn(
+          "perspective-1000 flex h-full w-full items-center justify-center rounded-md",
+        )}
+      >
+        <motion.div
+          className={cn(className, "backface-hidden absolute h-full w-full")}
+          animate={{ rotateY: isFlipped ? 180 : 0 }}
+          transition={{ duration: 0.2, ease: "easeInOut" }}
+        >
+          <div
+            className={cn(
+              "flex h-full w-full items-center justify-center rounded-md",
+            )}
+          >
+            Frame {frameNum}
+          </div>
+        </motion.div>
+        <motion.div
+          className={cn(className, "backface-hidden absolute h-full w-full")}
+          animate={{ rotateY: isFlipped ? 0 : -180 }}
+          transition={{ duration: 0.2, ease: "easeInOut" }}
+          style={{ rotateY: 180 }}
+        >
+          <div
+            className={cn(
+              "flex h-full w-full items-center justify-center rounded-md",
+            )}
+          >
+            Back {frameNum}
+          </div>
+        </motion.div>
       </div>
     </motion.div>
   );
