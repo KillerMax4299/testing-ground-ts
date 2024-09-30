@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 const FramerMotion = () => {
   const [frame, setFrame] = useState<number>(1);
   const [direction, setDirection] = useState<number>(0);
-  const [isFlipped, setIsFlipped] = useState<boolean>(false);
 
   const nextFrame = () => {
     setDirection(1);
@@ -16,10 +15,6 @@ const FramerMotion = () => {
     setDirection(-1);
     setFrame((prev) => (prev > 1 ? prev - 1 : prev));
   };
-
-  useEffect(() => {
-    console.log(isFlipped);
-  }, [isFlipped]);
 
   return (
     <div className="mx-auto mt-20 h-min w-40 border">
@@ -76,41 +71,31 @@ const FramerMotion = () => {
 };
 
 const variants = {
-  enter: (direction: number) => {
-    return {
-      x: direction > 0 ? "100%" : "-100%",
-      opacity: 1,
-      scale: 1,
-    };
-  },
+  enter: (direction: number) => ({
+    x: direction > 0 ? "100%" : "-100%",
+    opacity: 0,
+  }),
   center: {
     x: 0,
     opacity: 1,
-    scale: 1,
   },
-  exit: (direction: number) => {
-    return {
-      x: direction < 0 ? "100%" : "-100%",
-      opacity: 1,
-      scale: 1,
-    };
-  },
+  exit: (direction: number) => ({
+    x: direction < 0 ? "100%" : "-100%",
+    opacity: 0,
+  }),
 };
 
 const Frame = ({
   frameNum,
   className,
-  frontText,
-  backText,
   custom,
 }: {
   frameNum: number;
   className: string;
-  frontText?: string;
-  backText?: string;
   custom: number;
 }) => {
-  const [isFlipped, setIsFlipped] = useState<boolean>(false);
+  const [isFlipped, setIsFlipped] = useState<string | undefined>();
+
   return (
     <motion.div
       variants={variants}
@@ -118,12 +103,8 @@ const Frame = ({
       initial="enter"
       animate="center"
       exit="exit"
-      onMouseEnter={() => setIsFlipped(true)}
-      onMouseLeave={() => setIsFlipped(false)}
       transition={{
-        // x: { type: "spring", stiffness: 300, damping: 30 },
-        duration: 0.3,
-        ease: cubicBezier(0.4, 0, 0.2, 1),
+        x: { type: "spring", stiffness: 300, damping: 30 },
         opacity: { duration: 0.2 },
       }}
       className={cn(
@@ -134,11 +115,14 @@ const Frame = ({
         className={cn(
           "perspective-1000 flex h-full w-full items-center justify-center rounded-md",
         )}
+        onMouseEnter={() => setIsFlipped("true")}
+        onMouseLeave={() => setIsFlipped("false")}
       >
         <motion.div
           className={cn(className, "backface-hidden absolute h-full w-full")}
-          animate={{ rotateY: isFlipped ? 180 : 0 }}
-          transition={{ duration: 0.2, ease: "easeInOut" }}
+          initial={{rotateY:0}}
+          animate={{ rotateY: isFlipped == "true" ? 180 : 0 }}
+          transition={{ duration: 0.6, ease: "easeInOut" }}
         >
           <div
             className={cn(
@@ -150,9 +134,10 @@ const Frame = ({
         </motion.div>
         <motion.div
           className={cn(className, "backface-hidden absolute h-full w-full")}
-          animate={{ rotateY: isFlipped ? 0 : -180 }}
-          transition={{ duration: 0.2, ease: "easeInOut" }}
-          style={{ rotateY: 180 }}
+          initial={{ rotateY: -180 }}
+          animate={{ rotateY: isFlipped == "true" ? 0 : -180 }}
+          transition={{ duration: 0.6, ease: "easeInOut" }}
+          // style={{ rotateY: 180 }}
         >
           <div
             className={cn(
