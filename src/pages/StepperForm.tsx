@@ -1,8 +1,8 @@
 import { useForm } from "react-hook-form";
 import { Textinputs } from "@/components/ui/Inputs";
 import { useFormStore } from "@/zustand/zustandStore";
-import { AnimatePresence, motion } from "framer-motion";
-import { Fragment ,ReactNode, useMemo, useState, useRef, useEffect } from "react";
+import { AnimatePresence, motion, cubicBezier } from "framer-motion";
+import { Fragment ,ReactNode, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const variants = {
@@ -70,7 +70,7 @@ const StepperForm = () => {
               exit="exit"
               transition={{
                 duration: 0.6,
-                ease: "easeIn",
+                ease: cubicBezier(0.4, 0, 0.2, 1),
                 opacity: { duration: 0.2 },
               }}
               className="absolute"
@@ -113,7 +113,7 @@ const StepperForm = () => {
               exit="exit"
               transition={{
                 duration: 0.6,
-                ease: "easeIn",
+                ease: cubicBezier(0.4, 0, 0.2, 1),
                 opacity: { duration: 0.2 },
               }}
               className="absolute border"
@@ -164,7 +164,8 @@ const StepperForm = () => {
               animate="center"
               exit="exit"
               transition={{
-                x: { type: "spring", stiffness: 3000, damping: 300 },
+                duration: 0.6,
+                ease: cubicBezier(0.4, 0, 0.2, 1),
                 opacity: { duration: 0.2 },
               }}
             >

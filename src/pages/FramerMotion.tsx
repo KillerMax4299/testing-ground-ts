@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, Fragment, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -18,7 +18,9 @@ const FramerMotion = () => {
 
   return (
     <>
-      <Steps frame={frame} totalForms={3} />
+      <div className="flex flex-col items-center">
+        <Steps frame={frame} totalForms={3} />
+      </div>
 
       <div className="mx-auto h-min w-40">
         <div className="relative h-40 overflow-hidden">
@@ -162,45 +164,44 @@ interface StepsProps {
 }
 
 const Steps = ({ frame, totalForms }: StepsProps) => {
-  return (
-    <div className="flex items-center space-x-4 transition-colors duration-500">
-      <div
-        className={cn(
-          frame >= 1 ? "bg-blue-500" : "bg-zinc-700",
-          "flex size-6 items-center justify-center rounded-full",
-        )}
-      >
-        1
-      </div>
-      {Array.from({ length: totalForms - 1 }).map((_, index) => (
-        <>
-          <div className="relative h-[2px] w-1/12 overflow-hidden">
-            <AnimatePresence>
-              {frame >= index + 2 && (
-                <motion.div
-                  initial={{ x: "-100%" }}
-                  animate={{ x: 0 }}
-                  exit={{ x: "-100%" }}
-                  transition={{
-                    duration: 0.5,
-                    ease: "easeInOut",
-                  }}
-                  className="absolute h-full w-full bg-blue-300"
-                />
-              )}
-            </AnimatePresence>
+  const steps = useMemo(
+    () => Array.from({ length: totalForms }, (_, i) => i + 1),
+    [totalForms],
+  );
 
-            <div className="h-full w-full bg-zinc-700" />
-          </div>
+  return (
+    <div className="flex w-full items-center space-x-4 border-x px-6 transition-colors duration-500 md:w-1/2 xl:w-1/5">
+      {steps.map((step, index) => (
+        <Fragment key={step}>
+          {index > 0 && (
+            <div className="relative h-[2px] flex-grow overflow-hidden">
+              <AnimatePresence>
+                {frame >= step && (
+                  <motion.div
+                    initial={{ x: "-100%" }}
+                    animate={{ x: 0 }}
+                    exit={{ x: "-100%" }}
+                    transition={{
+                      duration: 0.5,
+                      ease: "easeInOut",
+                    }}
+                    className="absolute h-full w-full bg-blue-300"
+                  />
+                )}
+              </AnimatePresence>
+              <div className="h-full w-full bg-zinc-700" />
+            </div>
+          )}
           <div
             className={cn(
-              frame >= index + 2 ? "bg-blue-500 delay-500" : "bg-zinc-700",
-              "flex size-6 items-center justify-center rounded-full duration-300",
+              frame >= step ? "bg-blue-500" : "bg-zinc-700",
+              "flex size-5 md:size-6 text-xs md:text-base items-center justify-center rounded-full",
+              index > 0 && "delay-500 duration-300",
             )}
           >
-            {index + 2}
+            {step}
           </div>
-        </>
+        </Fragment>
       ))}
     </div>
   );
