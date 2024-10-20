@@ -1,8 +1,9 @@
 import { useForm } from "react-hook-form";
 import { Textinputs } from "@/components/ui/Inputs";
+import { useNavigate } from "react-router-dom";
 import { useFormStore } from "@/zustand/zustandStore";
 import { AnimatePresence, motion, cubicBezier } from "framer-motion";
-import { Fragment ,ReactNode, useMemo, useState } from "react";
+import { Fragment, ReactNode, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const variants = {
@@ -21,6 +22,8 @@ const variants = {
 };
 
 const StepperForm = () => {
+
+  const navigate = useNavigate()
   const [currentForm, setCurrentForm] = useState<number>(1);
   const [direction, setDirection] = useState<number>(0);
 
@@ -35,7 +38,7 @@ const StepperForm = () => {
     setCurrentForm((prev) => (prev > 1 ? prev - 1 : prev));
   };
 
-  const { form1, form2, updateform2, updateform1 } = useFormStore();
+  const { form1, form2, updateform2, updateform1, resetForm } = useFormStore();
 
   const useForm1 = useForm({
     mode: "all",
@@ -173,6 +176,18 @@ const StepperForm = () => {
                 {formData?.firstName as ReactNode}{" "}
                 {formData?.lastName as ReactNode}
               </pre>
+              <div className="flex space-x-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigate(-1);
+                    resetForm()
+                  }}
+                  className="dark:text-white"
+                >
+                  Submit
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -196,7 +211,10 @@ interface StepsProps {
 }
 
 const Steps = ({ frame, totalForms }: StepsProps) => {
-  const steps = useMemo(() => Array.from({ length: totalForms }, (_, i) => i + 1), [totalForms]);
+  const steps = useMemo(
+    () => Array.from({ length: totalForms }, (_, i) => i + 1),
+    [totalForms],
+  );
 
   return (
     <div className="flex w-full items-center space-x-4 border-x px-6 transition-colors duration-500 md:w-1/3 xl:w-1/5">
@@ -225,7 +243,7 @@ const Steps = ({ frame, totalForms }: StepsProps) => {
             className={cn(
               frame >= step ? "bg-blue-500" : "bg-zinc-700",
               "flex size-6 items-center justify-center rounded-full",
-              index > 0 && "delay-500 duration-300"
+              index > 0 && "delay-500 duration-300",
             )}
           >
             {step}
@@ -235,5 +253,3 @@ const Steps = ({ frame, totalForms }: StepsProps) => {
     </div>
   );
 };
-
-
