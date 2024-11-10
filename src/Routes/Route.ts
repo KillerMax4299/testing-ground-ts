@@ -4,6 +4,8 @@ import GroupedTable from "@/pages/RowGrouping";
 import StepperForm from "@/pages/StepperForm";
 import DynamicForm from "@/pages/DynamicForm";
 import FramerMotion from "@/pages/FramerMotion";
+import PlateDemo from "@/pages/PlateDemo";
+import DemoTabs from "@/pages/Tabs";
 
 export const routes = [
   {
@@ -35,5 +37,15 @@ export const routes = [
     name: "Framer motion",
     path: "/motion",
     Component: FramerMotion,
+  },
+  {
+    name: "Plate Demo",
+    path: "/plate",
+    Component: PlateDemo,
+  },
+  {
+    name: "Tabs",
+    path: "/tabs",
+    Component: DemoTabs,
   },
 ];
