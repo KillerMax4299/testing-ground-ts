@@ -6,6 +6,8 @@ import DynamicForm from "@/pages/DynamicForm";
 import FramerMotion from "@/pages/FramerMotion";
 import PlateDemo from "@/pages/PlateDemo";
 import DemoTabs from "@/pages/Tabs";
+import { ShiftingDropDown } from "@/pages/ShiftingDropdown";
+import NavigationMenuDemo from "@/pages/NavigationMenu";
 
 export const routes = [
   {
@@ -47,5 +49,15 @@ export const routes = [
     name: "Tabs",
     path: "/tabs",
     Component: DemoTabs,
+  },
+  {
+    name: "Shifting Dropdown",
+    path: "/shift",
+    Component: ShiftingDropDown,
+  },
+  {
+    name: "Navigation Menu",
+    path: "/nav",
+    Component: NavigationMenuDemo,
   },
 ];
