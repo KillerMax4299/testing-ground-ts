@@ -61,7 +61,7 @@ const StepperForm = () => {
   return (
     <div className="flex h-screen flex-col items-center bg-white dark:bg-zinc-800">
       <Steps frame={currentForm} totalForms={2} />
-      <div className="relative flex h-screen w-full justify-center overflow-hidden border-x p-4 md:w-1/3 xl:w-1/5">
+      <div className="flex w-fit justify-center overflow-hidden border border-white p-4">
         <AnimatePresence initial={false} custom={direction}>
           {currentForm === 1 && (
             <motion.div
@@ -76,7 +76,7 @@ const StepperForm = () => {
                 ease: cubicBezier(0.4, 0, 0.2, 1),
                 opacity: { duration: 0.2 },
               }}
-              className="absolute"
+              className="border border-red-500"
             >
               <form
                 onSubmit={useForm1.handleSubmit(() => {
@@ -119,7 +119,8 @@ const StepperForm = () => {
                 ease: cubicBezier(0.4, 0, 0.2, 1),
                 opacity: { duration: 0.2 },
               }}
-              className="absolute border"
+              className=" border border-red-500"
+              
             >
               <form
                 onSubmit={useForm2.handleSubmit(() => {
@@ -181,7 +182,7 @@ const StepperForm = () => {
                   type="button"
                   onClick={() => {
                     navigate(-1);
-                    resetForm()
+                    resetForm();
                   }}
                   className="dark:text-white"
                 >
@@ -203,13 +204,6 @@ interface StepsProps {
   totalForms: number;
 }
 
-// Assuming you have a utility function for class names
-
-interface StepsProps {
-  frame: number;
-  totalForms: number;
-}
-
 const Steps = ({ frame, totalForms }: StepsProps) => {
   const steps = useMemo(
     () => Array.from({ length: totalForms }, (_, i) => i + 1),
@@ -217,7 +211,7 @@ const Steps = ({ frame, totalForms }: StepsProps) => {
   );
 
   return (
-    <div className="flex w-full items-center space-x-4 border-x px-6 transition-colors duration-500 md:w-1/3 xl:w-1/5">
+    <div className="flex w-full items-center space-x-4 px-6 transition-colors duration-500 md:w-1/3 xl:w-1/5">
       {steps.map((step, index) => (
         <Fragment key={step}>
           {index > 0 && (
@@ -236,13 +230,13 @@ const Steps = ({ frame, totalForms }: StepsProps) => {
                   />
                 )}
               </AnimatePresence>
-              <div className="h-full w-full bg-zinc-700" />
+              <div className="h-full w-full bg-zinc-300 dark:bg-zinc-700" />
             </div>
           )}
           <div
             className={cn(
-              frame >= step ? "bg-blue-500" : "bg-zinc-700",
-              "flex size-6 items-center justify-center rounded-full",
+              frame >= step ? "bg-blue-500" : "bg-zinc-400 dark:bg-zinc-700",
+              "flex size-6 items-center justify-center rounded-full text-white",
               index > 0 && "delay-500 duration-300",
             )}
           >
