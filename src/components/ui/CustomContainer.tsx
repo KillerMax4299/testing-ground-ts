@@ -16,7 +16,7 @@ interface DropProps {
   ownerLicense: OwnerLicenseProps[];
   setisFileUploadError: Dispatch<SetStateAction<boolean>>;
   maxFiles: number;
-  formats: string[];
+  formatList: string[];
   maxFileSize: number;
   setOwnerLicense: Dispatch<SetStateAction<OwnerLicenseProps[]>>;
 }
@@ -32,12 +32,16 @@ export function CustomDragDrop({
   setOwnerLicense,
   setisFileUploadError,
   maxFiles,
-  formats,
+  formatList,
   maxFileSize,
 }: DropProps) {
   const dropContainer = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const formats = useMemo(() => {
+    return [...formatList, ...formatList.map((e) => e.toLocaleUpperCase())];
+  }, []);
 
   // Temporary alert function - replace with your preferred alert system
   const showAlert = ({ icon, title, text }: AlertProps) => {
@@ -53,7 +57,7 @@ export function CustomDragDrop({
 
   useEffect(() => {
     setisFileUploadError(filteredFiles.includes(true));
-  }, [filteredFiles])
+  }, [filteredFiles]);
 
   function onUpload(f: OwnerLicenseProps[]) {
     setOwnerLicense([...ownerLicense, ...f]);
@@ -209,7 +213,7 @@ export function CustomDragDrop({
             or drag and drop
           </div>
           <div className="text-[10px] font-normal text-gray-500">
-            {`Maximum ${maxFiles} files: ${formats.join(", ").toUpperCase()}`}
+            {`Maximum ${maxFiles} files: ${formatList.join(", ").toUpperCase()}`}
           </div>
         </div>
       </div>
@@ -227,7 +231,7 @@ export function CustomDragDrop({
               )}
             >
               <div className="flex justify-between">
-                <div className="flex w-[70%] items-center justify-start space-x-2">
+                <div className="flex w-[70%] max-w-[70%] items-center justify-start space-x-2">
                   <div
                     className={cn(
                       "cursor-pointer text-[37px]",
@@ -242,21 +246,21 @@ export function CustomDragDrop({
                       <FaRegFile />
                     )}
                   </div>
-                  <div className="space-y-1">
-                    <div className="text-xs font-medium text-gray-500 dark:text-gray-300">
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <div className="overflow-wrap-anywhere break-all text-xs font-medium text-gray-500 dark:text-gray-300">
                       {img.name}
                     </div>
                     <div
                       className={cn(
-                        "flex space-x-2 whitespace-nowrap text-xs font-medium",
+                        "flex flex-wrap gap-1 text-xs font-medium",
                         filteredFiles[index]
                           ? "text-red-600 dark:text-red-300"
                           : "text-gray-400",
                       )}
                     >
-                      <span>{`${Math.floor(img.size / 1024)} KB`}</span>
+                      <span className="whitespace-nowrap">{`${Math.floor(img.size / 1024)} KB`}</span>
                       {filteredFiles[index] && (
-                        <span className="">
+                        <span className="overflow-wrap-anywhere break-words">
                           (This file exceeds the file size limit)
                         </span>
                       )}

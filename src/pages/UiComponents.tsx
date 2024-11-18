@@ -27,7 +27,7 @@ const UiComponents = () => {
   ];
 
   return (
-    <div className="h-screen w-screen bg-white dark:bg-zinc-900 p-24">
+    <div className="h-screen w-screen bg-white dark:bg-zinc-900 p-2">
       <div className="w-72">
         <MultiSelect
           options={frameworksList}
