@@ -1,6 +1,7 @@
 import { useState, Fragment, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const FramerMotion = () => {
   const [frame, setFrame] = useState<number>(1);
@@ -31,6 +32,8 @@ const FramerMotion = () => {
                 frameNum={1}
                 className="bg-green-500"
                 custom={direction}
+                onNext={nextFrame}
+                showNext
               />
             )}
             {frame === 2 && (
@@ -39,6 +42,10 @@ const FramerMotion = () => {
                 frameNum={2}
                 className="bg-amber-400"
                 custom={direction}
+                onPrev={prevFrame}
+                onNext={nextFrame}
+                showPrev
+                showNext
               />
             )}
             {frame === 3 && (
@@ -47,29 +54,12 @@ const FramerMotion = () => {
                 frameNum={3}
                 className="bg-red-600"
                 custom={direction}
+                onPrev={prevFrame}
+                onNext={nextFrame}
+                showPrev
               />
             )}
           </AnimatePresence>
-        </div>
-        <div className="mt-1 flex justify-between px-2">
-          <button
-            className={cn(
-              "rounded-md bg-blue-400 px-2 py-1 disabled:cursor-not-allowed disabled:bg-neutral-400 disabled:text-neutral-300",
-            )}
-            onClick={prevFrame}
-            disabled={frame === 1}
-          >
-            prev
-          </button>
-          <button
-            className={cn(
-              "rounded-md bg-blue-400 px-2 py-1 disabled:cursor-not-allowed disabled:bg-neutral-400 disabled:text-neutral-300",
-            )}
-            onClick={nextFrame}
-            disabled={frame === 3}
-          >
-            next
-          </button>
         </div>
       </div>
     </>
@@ -91,15 +81,27 @@ const variants = {
   }),
 };
 
+export default FramerMotion;
+
+interface FrameProps {
+  frameNum: number;
+  className: string;
+  custom: number;
+  onPrev?: () => void;
+  onNext?: () => void;
+  showPrev?: boolean;
+  showNext?: boolean;
+}
+
 const Frame = ({
   frameNum,
   className,
   custom,
-}: {
-  frameNum: number;
-  className: string;
-  custom: number;
-}) => {
+  onPrev,
+  onNext,
+  showPrev,
+  showNext,
+}: FrameProps) => {
   const [isFlipped, setIsFlipped] = useState<string | undefined>();
 
   return (
@@ -121,8 +123,8 @@ const Frame = ({
         className={cn(
           "flex h-full w-full items-center justify-center rounded-md perspective-1000",
         )}
-        onMouseEnter={() => setIsFlipped("true")}
-        onMouseLeave={() => setIsFlipped("false")}
+        // onMouseEnter={() => setIsFlipped("true")}
+        // onMouseLeave={() => setIsFlipped("false")}
       >
         <motion.div
           className={cn(
@@ -136,8 +138,24 @@ const Frame = ({
           <div className={cn("flex h-full w-full items-center justify-center")}>
             Frame {frameNum}
           </div>
+          {showPrev && (
+            <button
+              onClick={onPrev}
+              className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white p-1 shadow-md"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+          )}
+          {showNext && (
+            <button
+              onClick={onNext}
+              className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white p-1 shadow-md"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          )}
         </motion.div>
-        <motion.div
+        {/* <motion.div
           className={cn(
             className,
             "absolute h-full w-full rounded-md backface-hidden",
@@ -150,13 +168,11 @@ const Frame = ({
           <div className={cn("flex h-full w-full items-center justify-center")}>
             Back {frameNum}
           </div>
-        </motion.div>
+        </motion.div> */}
       </div>
     </motion.div>
   );
 };
-
-export default FramerMotion;
 
 interface StepsProps {
   frame: number;
@@ -195,7 +211,7 @@ const Steps = ({ frame, totalForms }: StepsProps) => {
           <div
             className={cn(
               frame >= step ? "bg-blue-500" : "bg-zinc-700",
-              "flex size-5 md:size-6 text-xs md:text-base items-center justify-center rounded-full",
+              "flex size-5 items-center justify-center rounded-full text-xs md:size-6 md:text-base",
               index > 0 && "delay-500 duration-300",
             )}
           >
