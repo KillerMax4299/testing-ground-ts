@@ -20,7 +20,7 @@ export default function DragComponent() {
         ownerLicense={ownerLicense}
         setOwnerLicense={setOwnerLicense}
         setisFileUploadError={setisFileUploadError}
-        maxFiles={10}
+        maxFiles={2}
         formatList={["jpg", "jpeg", "png"]}
         maxFileSize={1024}
       />
