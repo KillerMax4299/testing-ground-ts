@@ -10,15 +10,15 @@ import {
   getCoreRowModel,
   flexRender,
   ColumnDef,
-  Table,
+  Table as TableType,
   Row,
 } from "@tanstack/react-table";
+import { Table, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
-
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  
 } from "@tanstack/react-table";
 import { useQuery } from "@tanstack/react-query";
 
@@ -74,11 +74,19 @@ type DataItem = {
   participant_designation_name: string;
 };
 
+interface CustomColumnProperties {
+  className?: string;
+  headclass?: string;
+  accessorKey?: string;
+}
+
+type CustomColumnDef<TData> = ColumnDef<TData> & CustomColumnProperties;
+
 const SelectableTable = () => {
   // Sample data
   const ListOptions = [10, 15, "all"];
   const [items, setItems] = useState(ListOptions[0]);
-  const { data: demandList, isLoading: loading } = useQuery({
+  const { data: demandList } = useQuery({
     queryKey: ["demandList"],
     queryFn: async () => {
       const data = await axios.get(
@@ -92,32 +100,37 @@ const SelectableTable = () => {
   const data = useMemo(() => demandList?.result ?? [], [demandList]);
   const [rowSelection, setRowSelection] = useState({});
 
-  useEffect(() => {}, []);
-
   // Define columns without column helper
-  const columns: ColumnDef<DataItem>[] = [
+  const columns: CustomColumnDef<DataItem>[] = [
     {
       id: "select",
       header: ({ table }) => (
-        <input
-          type="checkbox"
-          checked={table.getIsAllRowsSelected()}
-          onChange={table.getToggleAllRowsSelectedHandler()}
-          className="h-4 w-4"
-        />
+        <div className="flex items-center">
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && "indeterminate")
+            }
+            onCheckedChange={(value) =>
+              table.toggleAllPageRowsSelected(!!value)
+            }
+            aria-label="Select all"
+          />
+        </div>
       ),
       cell: ({ row }) => (
-        <input
-          type="checkbox"
-          checked={row.getIsSelected()}
-          onChange={row.getToggleSelectedHandler()}
-          className="h-4 w-4"
-        />
+        <div className="flex items-center">
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label="Select row"
+          />
+        </div>
       ),
     },
     {
       accessorKey: "participants_id",
-      header: "ID",
+      header: "Id",
       cell: ({ row }) => <span>{row.index + 1}</span>,
     },
     {
@@ -138,11 +151,18 @@ const SelectableTable = () => {
     columns,
     state: {
       rowSelection,
+      globalFilter:filtering,
     },
     initialState: {
       pagination: {
-        pageSize: items == "all" ? demandList?.total : items as number,
+        pageSize: items == "all" ? demandList?.total : (items as number),
       },
+      sorting: [
+        {
+          id: columns[1].accessorKey as string,
+          desc: false,
+        },
+      ],
     },
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -152,7 +172,6 @@ const SelectableTable = () => {
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     enableSortingRemoval: false,
-
   });
 
   return (
@@ -165,7 +184,13 @@ const SelectableTable = () => {
               name=""
               id=""
               value={items}
-              onChange={(e) => setItems(parseInt(e.target.value) ? parseInt(e.target.value) : e.target.value)}
+              onChange={(e) =>
+                setItems(
+                  parseInt(e.target.value)
+                    ? parseInt(e.target.value)
+                    : e.target.value,
+                )
+              }
             >
               {ListOptions.map((e) => (
                 <option key={e} value={e}>
@@ -184,54 +209,68 @@ const SelectableTable = () => {
             </div>
           </div>
           <div className="show-scrollbar h-fit w-full overflow-x-auto overflow-y-hidden">
-            <table className="drop-shadow-none">
-              {table.getHeaderGroups().map((headerGroup) => (
-                <thead key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <td
-                      key={header.id}
-                      className={cn(
-                        header.column.columnDef.headclass,
-                        "theader-style whitespace-nowrap bg-cyan-400/90 transition-all",
-                      )}
-                      onClick={header.column.getToggleSortingHandler()}
-                    >
-                      {header.isPlaceholder ? null : (
-                        <div className="flex items-center justify-between space-x-2">
-                          <span className="normal-case">
-                            {flexRender(
-                              header.column.columnDef.header,
-                              header.getContext(),
-                            )}
-                          </span>
-                        </div>
-                      )}
-                    </td>
+            <>
+              <Table>
+                <TableHeader>
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    <TableRow key={headerGroup.id}>
+                      {headerGroup.headers.map((header) => (
+                        <TableHead
+                          key={header.id}
+                          onClick={header.column.getToggleSortingHandler()}
+                          className={cn(
+                            (
+                              header.column
+                                .columnDef as CustomColumnDef<DataItem>
+                            ).headclass,
+                            "whitespace-nowrap bg-zinc-100 dark:bg-zinc-800",
+                          )}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <span
+                              className={cn(
+                                "select-none normal-case",
+                                header.column.columnDef.header,
+                              )}
+                            >
+                              {flexRender(
+                                header.column.columnDef.header,
+                                header.getContext(),
+                              )}
+                            </span>
+                            {/* <SortIcon
+                              sort={header.column.getIsSorted()}
+                              accessorKey={header.column.columnDef.accessorKey}
+                            /> */}
+                          </div>
+                        </TableHead>
+                      ))}
+                    </TableRow>
                   ))}
-                </thead>
-              ))}
-
-              <tbody className="divide-y">
-                {table.getRowModel().rows.map((row) => (
-                  <tr key={row.id} className="divide-x">
-                    {row.getVisibleCells().map((cell) => (
-                      <td
-                        key={cell.id}
-                        className={cn(
-                          cell.column.columnDef.className,
-                          "whitespace-nowrap px-2 py-1",
-                        )}
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                </TableHeader>
+                <tbody className="divide-y">
+                  {table.getRowModel().rows.map((row) => (
+                    <tr key={row.id}>
+                      {row.getVisibleCells().map((cell) => (
+                        <td
+                          key={cell.id}
+                          className={cn(
+                            (cell.column.columnDef as CustomColumnDef<DataItem>)
+                              .className,
+                            "whitespace-nowrap px-4 py-2",
+                          )}
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </>
           </div>
           <Pagination data={data} table={table} />
         </div>
@@ -241,7 +280,13 @@ const SelectableTable = () => {
   );
 };
 
-export const Pagination = ({ table, data }: { table: any; data: any }) => {
+export const Pagination = ({
+  table,
+  data,
+}: {
+  table: TableType<DataItem>;
+  data: any;
+}) => {
   const { pageIndex, pageSize } = table.getState().pagination;
 
   const startIndex = pageIndex * pageSize + 1;
