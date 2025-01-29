@@ -19,9 +19,9 @@ const FramerMotion = () => {
 
   return (
     <>
-      <div className="flex flex-col items-center">
+      {/* <div className="flex flex-col items-center">
         <Steps frame={frame} totalForms={3} />
-      </div>
+      </div> */}
 
       <div className="mx-auto h-min w-40">
         <div className="relative h-40 overflow-hidden">

@@ -4,7 +4,11 @@ import DragComponent from "./DragComponent";
 import { ReactTableDevtools } from "@tanstack/react-table-devtools";
 import axios from "axios";
 import { cn } from "@/lib/utils";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+import { createColumnHelper } from "@tanstack/react-table";
+
+import { TableBody, TableCell } from "@/components/ui/table";
 import {
   useReactTable,
   getCoreRowModel,
@@ -21,6 +25,7 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
 
 const UiComponents = () => {
   const frameworksList = [
@@ -48,18 +53,23 @@ const UiComponents = () => {
 
   return (
     <div className="h-screen w-screen bg-white p-2 dark:bg-zinc-900">
-      <div className="w-72">
-        <MultiSelect
-          options={frameworksList}
-          onValueChange={(e) => console.log(e)}
-          placeholder="Select options"
-          variant="inverted"
-          animation={2}
-          maxCount={3}
-        />
-      </div>
+      <form
+        action="
+      "
+      >
+        <div className="w-72">
+          <MultiSelect
+            options={frameworksList}
+            onValueChange={(e) => console.log(e)}
+            placeholder="Select options"
+            variant="inverted"
+            animation={2}
+            maxCount={3}
+          />
+        </div>
+      </form>
       {/* <DragComponent/> */}
-      <SelectableTable />
+      <EditableTable />
     </div>
   );
 };
@@ -78,6 +88,7 @@ interface CustomColumnProperties {
   className?: string;
   headclass?: string;
   accessorKey?: string;
+  editable?: boolean;
 }
 
 type CustomColumnDef<TData> = ColumnDef<TData> & CustomColumnProperties;
@@ -151,7 +162,7 @@ const SelectableTable = () => {
     columns,
     state: {
       rowSelection,
-      globalFilter:filtering,
+      globalFilter: filtering,
     },
     initialState: {
       pagination: {
@@ -338,5 +349,298 @@ export const Pagination = ({
         </nav>
       </div>
     </>
+  );
+};
+
+interface Person {
+  id?: number;
+  firstName: string;
+  lastName: string;
+  age: string;
+  role: string;
+}
+
+interface PosPerson extends Person {
+  positionIndex: number;
+}
+
+// Define props for the EditableCell component
+interface EditableCellProps {
+  getValue: () => any;
+  row: { index: number };
+  column: { id: string; columnDef: ColumnDef<Person> & { editable?: boolean } };
+  table: {
+    options: {
+      meta?: {
+        updateData: (rowIndex: number, columnId: string, value: string) => void;
+      };
+    };
+  };
+}
+
+interface EditableTableProps {
+  onDataChange?: (data: Person[]) => void;
+  initialData?: Person[];
+}
+
+const EditableCell = ({ getValue, row, column, table }: EditableCellProps) => {
+  const initialValue = getValue();
+  const [value, setValue] = useState(initialValue);
+  const columnDef = column.columnDef;
+
+  const onBlur = () => {
+    if (value !== initialValue) {
+      table.options.meta?.updateData(row.index, column.id, value);
+    }
+  };
+
+  if (!columnDef.editable) {
+    return <span className="px-2">{value}</span>;
+  }
+
+  return (
+    <input
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      onBlur={onBlur}
+      className="w-fit outline-none dark:bg-transparent"
+    />
+  );
+};
+
+const EditableSelect = ({
+  getValue,
+  row,
+  column,
+  table,
+}: EditableCellProps) => {
+  const initialValue = getValue();
+  const [value, setValue] = useState(initialValue);
+  const columnDef = column.columnDef;
+
+  const onBlur = () => {
+    if (value !== initialValue) {
+      table.options.meta?.updateData(row.index, column.id, value);
+    }
+  };
+
+  if (!columnDef.editable) {
+    return <span className="px-2">{value}</span>;
+  }
+
+  return (
+    <select
+      value={value}
+      onChange={(e) => setValue(e.target.value)}
+      onBlur={onBlur}
+      className="w-fit outline-none dark:bg-transparent"
+    />
+  );
+};
+
+const EditableTable = ({ onDataChange }: EditableTableProps) => {
+  const defaultData: Person[] = [
+    { id: 1, firstName: "John", lastName: "Doe", age: "25", role: "Developer" },
+    {
+      id: 2,
+      firstName: "Jane",
+      lastName: "Smith",
+      age: "30",
+      role: "Designer",
+    },
+    {
+      id: 3,
+      firstName: "Bob",
+      lastName: "Johnson",
+      age: "35",
+      role: "Manager",
+    },
+  ];
+
+  const [data, setData] = useState<PosPerson[]>(
+    defaultData.map((e, i) => {
+      return { positionIndex: i + 1, ...e };
+    }),
+  );
+  const [hasChanges, setHasChanges] = useState(false);
+  const [originalData] = useState<PosPerson[]>(
+    defaultData.map((e, i) => {
+      return { positionIndex: i + 1, ...e };
+    }),
+  );
+
+  const handlePositionChange = (index: number, change: number): void => {
+    const newItems = [...data];
+    // const currentItem = newItems.filter((e) => e.positionIndex == index + 1)[0];
+    const currentItem = newItems[index];
+
+    const newPosition = Math.max(
+      1,
+      Math.min(data.length, currentItem.positionIndex + change),
+    );
+
+    // Only proceed if position actually changes
+    if (newPosition === currentItem.positionIndex) return;
+
+    // Find the item that needs to swap
+    const itemToSwap = newItems.find(
+      (item) => item.positionIndex === newPosition,
+    );
+
+    // Update positions
+    if (itemToSwap) {
+      itemToSwap.positionIndex = currentItem.positionIndex;
+    }
+    currentItem.positionIndex = newPosition;
+
+    setData(newItems);
+  };
+
+  const columns: CustomColumnDef<Person>[] = [
+    {
+      accessorKey: "firstName",
+      header: "First Name",
+      // @ts-expect-error Table cell type incompatibility
+      cell: EditableCell,
+      editable: true,
+    },
+    {
+      accessorKey: "lastName",
+      header: "Last Name",
+      // @ts-expect-error Table cell type incompatibility
+      cell: EditableCell,
+      editable: true,
+    },
+    {
+      accessorKey: "age",
+      header: "Age",
+      // @ts-expect-error Table cell type incompatibility
+      cell: EditableCell,
+      editable: false,
+    },
+    {
+      accessorKey: "role",
+      header: "Role",
+      // @ts-expect-error Table cell type incompatibility
+      cell: EditableCell,
+      editable: false,
+    },
+    {
+      accessorKey: "positionIndex",
+      header: "Hierarchy",
+
+      cell: ({ row }: { row: Row<any> }) => (
+        <>
+          <button
+            onClick={() => handlePositionChange(row.index, -1)}
+            className="border p-2 px-4"
+          >
+            -
+          </button>
+          {row.original.positionIndex}
+          <button
+            onClick={() => handlePositionChange(row.index, 1)}
+            className="border p-2 px-4"
+          >
+            +
+          </button>
+        </>
+      ),
+      editable: false,
+    },
+  ];
+
+  const checkForChanges = useCallback(
+    (newData: Person[]) => {
+      const hasAnyChanges = newData.some((row, index) => {
+        const originalRow = originalData[index];
+        return Object.keys(row).some(
+          (key) =>
+            row[key as keyof Person] !== originalRow[key as keyof Person],
+        );
+      });
+      setHasChanges(hasAnyChanges);
+    },
+    [originalData],
+  );
+
+  const table = useReactTable({
+    data,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    meta: {
+      updateData: (rowIndex: number, columnId: string, value: string) => {
+        setData((old) => {
+          const newData = old.map((row, index) => {
+            if (index === rowIndex) {
+              return {
+                ...old[rowIndex],
+                [columnId]: value,
+              };
+            }
+            return row;
+          });
+
+          // Check for changes and notify parent
+          checkForChanges(newData);
+          onDataChange?.(newData);
+
+          return newData;
+        });
+      },
+    },
+  });
+
+  const handleSave = () => {
+    // Here you can implement your save logic
+    console.log("Saving changes:", data);
+    setHasChanges(false);
+  };
+
+  const handleReset = () => {
+    setData(originalData);
+    setHasChanges(false);
+    onDataChange?.(originalData);
+  };
+
+  return (
+    <div className="space-y-4">
+      <Table>
+        <TableHeader>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <TableHead key={header.id}>
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext(),
+                  )}
+                </TableHead>
+              ))}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows.map((row) => (
+            <TableRow key={row.id}>
+              {row.getVisibleCells().map((cell) => (
+                <TableCell key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+
+      <div className="flex gap-2">
+        <Button onClick={handleSave} disabled={!hasChanges}>
+          Save Changes
+        </Button>
+        <Button onClick={handleReset} variant="outline" disabled={!hasChanges}>
+          Reset
+        </Button>
+      </div>
+    </div>
   );
 };

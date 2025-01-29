@@ -256,10 +256,10 @@ export const MultiSelect = React.forwardRef<
                       handleClear();
                     }}
                   />
-                  <Separator
+                  {/* <Separator
                     orientation="vertical"
                     className="flex h-full min-h-6"
-                  />
+                  /> */}
                   <ChevronDown className="mx-2 h-4 cursor-pointer text-muted-foreground" />
                 </div>
               </div>
